@@ -1,71 +1,32 @@
-import string
+# cipher.py
+# Running Key Cipher – Encryption & Decryption (ASCII based)
 
-ALPHABET = string.ascii_uppercase
+def prepare_key(text, key):
+    """Repeat or trim the key to match length of plaintext/ciphertext."""
+    key = key.replace(" ", "")
+    if len(key) >= len(text):
+        return key[:len(text)]
+    else:
+        # repeat if key is shorter
+        repeats = (len(text) // len(key)) + 1
+        return (key * repeats)[:len(text)]
 
-def running_key_encrypt(plaintext, running_key):
-    plaintext = plaintext.replace(" ", "").upper()
-    running_key = running_key.replace(" ", "").upper()
+def encrypt_running_key(plaintext, key):
+    plaintext = plaintext.upper().replace(" ", "")
+    key = prepare_key(plaintext, key).upper()
 
     ciphertext = ""
-    for p, k in zip(plaintext, running_key):
-        if p in ALPHABET and k in ALPHABET:
-            shift = ALPHABET.index(k)
-            c = ALPHABET[(ALPHABET.index(p) + shift) % 26]
-            ciphertext += c
+    for p, k in zip(plaintext, key):
+        c = ((ord(p) - 65) + (ord(k) - 65)) % 26
+        ciphertext += chr(c + 65)
     return ciphertext
 
-
-def running_key_decrypt(ciphertext, running_key):
-    ciphertext = ciphertext.replace(" ", "").upper()
-    running_key = running_key.replace(" ", "").upper()
+def decrypt_running_key(ciphertext, key):
+    ciphertext = ciphertext.upper()
+    key = prepare_key(ciphertext, key).upper()
 
     plaintext = ""
-    for c, k in zip(ciphertext, running_key):
-        if c in ALPHABET and k in ALPHABET:
-            shift = ALPHABET.index(k)
-            p = ALPHABET[(ALPHABET.index(c) - shift) % 26]
-            plaintext += p
+    for c, k in zip(ciphertext, key):
+        p = ((ord(c) - 65) - (ord(k) - 65)) % 26
+        plaintext += chr(p + 65)
     return plaintext
-
-
-def menu():
-    while True:
-        print("\n====== RUNNING KEY CIPHER ======")
-        print("1. Encrypt")
-        print("2. Decrypt")
-        print("3. Exit")
-
-        choice = input("Enter your choice: ")
-
-        if choice == "1":
-            plaintext = input("\nEnter plaintext: ")
-            running_key = input("Enter running key: ")
-
-            if len(running_key) < len(plaintext.replace(" ", "")):
-                print("\n[!] ERROR: Running key must be at least as long as plaintext!\n")
-                continue
-
-            cipher = running_key_encrypt(plaintext, running_key)
-            print("\nCiphertext:", cipher)
-
-        elif choice == "2":
-            ciphertext = input("\nEnter ciphertext: ")
-            running_key = input("Enter running key: ")
-
-            if len(running_key) < len(ciphertext.replace(" ", "")):
-                print("\n[!] ERROR: Running key must be at least as long as ciphertext!\n")
-                continue
-
-            plain = running_key_decrypt(ciphertext, running_key)
-            print("\nDecrypted plaintext:", plain)
-
-        elif choice == "3":
-            print("\nExiting program...")
-            break
-
-        else:
-            print("\nInvalid choice! Please try again.")
-
-
-# Run the menu
-menu()
